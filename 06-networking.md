@@ -19,7 +19,7 @@
 
 # Note
 
-Note: This tutorial was built using Docker v1.9. In v1.10, Docker uses DNS-based container discovery instead of `/etc/hosts`. If you're using 1.10, some outputs might differ from what is shown in this tutorial. Functionality should remain the same.
+Note: This tutorial was built using Docker v1.9. In v1.10 and v1.12.1 in centos and rhel. Docker uses DNS-based container discovery instead of `/etc/hosts`. If you're using 1.10, some outputs might differ from what is shown in this tutorial. Functionality should remain the same. 
 
 # Get started with multi-host networking
 
@@ -96,12 +96,24 @@ On `node-1`, `node-2`,and `node-3`, reconfigure the Docker daemon to listen on T
 2. Edit the `/etc/default/docker` file with your favorite editor (`vi` and `nano` are both available).
 
 		$ sudo vi /etc/default/docker
+	
+		in RHEL7.2/Centos7.2
+	
+		# mkdir /etc/systemd/system/docker.service.d
+		# vi /etc/systemd/system/docker.service.d/docker.conf
+		
 
 3. Add the following `DOCKER_OPTS`.
 
  	Make sure you provide the `Private IP` value for `node-0` where you started Consul.
 
 		DOCKER_OPTS="-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock --cluster-store=consul://<NODE-0-PRIVATE-IP>:8500/network --cluster-advertise=eth0:2375"
+		
+		In in RHEL7.2/Centos7.2
+	
+		[Service]
+		ExecStart=
+		ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock  --cluster-store=consul://<NODE-0-PRIVATE-IP>:8500/network --cluster-advertise=eth0:2375
 
 Note: node-0 has to be healthy and reachable by each of the node-1,2,3.
 
@@ -112,6 +124,12 @@ Note: node-0 has to be healthy and reachable by each of the node-1,2,3.
 		$ sudo service docker restart
 		docker stop/waiting
 		docker start/running, process 2003
+		
+		In in RHEL7.2/Centos7.2	
+	
+		# systemctl daemon-reload
+		# systemctl restart docker
+		
 
 6. Ensure that each engine restarts successfully:
 
